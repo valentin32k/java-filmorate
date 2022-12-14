@@ -23,7 +23,7 @@ class UserControllerTest {
     private HttpResponse<String> sendRequest(User user, String method) {
         HttpResponse<String> response;
         try {
-            String serverAdress = "http://localhost:8081/users";
+            String serverAdress = "http://localhost:8080/users";
             String body = gson.toJson(user);
             HttpRequest request;
             if (method.equals("POST")) {

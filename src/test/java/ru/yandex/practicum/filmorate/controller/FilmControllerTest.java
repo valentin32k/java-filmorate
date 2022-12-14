@@ -21,7 +21,7 @@ class FilmControllerTest {
     private HttpResponse<String> sendRequest(Film film, String method) {
         HttpResponse<String> response;
         try {
-            String serverAdress = "http://localhost:8081/films";
+            String serverAdress = "http://localhost:8080/films";
             String body = gson.toJson(film);
             HttpRequest request;
             if (method.equals("POST")) {
