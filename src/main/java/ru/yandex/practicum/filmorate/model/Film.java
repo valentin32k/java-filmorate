@@ -1,12 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.Value;
+import lombok.With;
 
-@Data
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+@Value
 public class Film {
-    private int id;
-    private final String name;
-    private final String description;
-    private final String releaseDate;
-    private final long duration;
+    @With
+    int id;
+    @NotBlank String name;
+    @Size(min = 0, max = 200) String description;
+    String releaseDate;
+    @DecimalMin("0") long duration;
 }
