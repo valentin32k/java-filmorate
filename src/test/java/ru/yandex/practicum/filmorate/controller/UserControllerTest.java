@@ -93,6 +93,12 @@ class UserControllerTest {
     }
 
     @Test
+    void updateWithWrongId() {
+        User wrongIdUser = validUser.withId(100);
+        Assertions.assertEquals(404, sendRequest(wrongIdUser, "PUT").statusCode());
+    }
+
+    @Test
     void updateWithVoidEmail() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);

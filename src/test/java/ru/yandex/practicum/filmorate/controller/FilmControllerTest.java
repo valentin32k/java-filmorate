@@ -122,6 +122,12 @@ class FilmControllerTest {
         Assertions.assertEquals(400, response.statusCode());
     }
 
+    @Test
+    void updateWithWrongId() {
+        Film wrongIdFilm = validFilm.withId(10);
+        Assertions.assertEquals(404,sendRequest(wrongIdFilm, "PUT").statusCode());
+    }
+
     private HttpResponse<String> sendRequest(Film film, String method) {
         HttpResponse<String> response;
         try {
