@@ -22,21 +22,18 @@ public class UserService {
     private final UserStorage userStorage;
 
     public void addFriend(int id, int friendId) {
-        if (getUserById(id) == null || getUserById(friendId) == null) {
-            throw new NotFoundException();
-        }
         User firstFriend = getUserById(id);
         User secondFriend = getUserById(friendId);
-        Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
-        if (userFriendsIds == null) {
-            userFriendsIds = new HashSet<>();
+        if (firstFriend == null) {
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
+        if (secondFriend == null) {
+            throw new NotFoundException("Пользователь с id=" + friendId + " не найден");
+        }
+        Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
         userFriendsIds.add(friendId);
         firstFriend = firstFriend.withFriendsIds(userFriendsIds);
         userFriendsIds = secondFriend.getFriendsIds();
-        if (userFriendsIds == null) {
-            userFriendsIds = new HashSet<>();
-        }
         userFriendsIds.add(id);
         secondFriend = secondFriend.withFriendsIds(userFriendsIds);
         userStorage.updateUser(firstFriend);
@@ -46,8 +43,11 @@ public class UserService {
     public void removeFriend(int id, int friendId) {
         User firstFriend = getUserById(id);
         User secondFriend = getUserById(friendId);
-        if (firstFriend == null || secondFriend == null) {
-            throw new NotFoundException();
+        if (firstFriend == null) {
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
+        }
+        if (secondFriend == null) {
+            throw new NotFoundException("Пользователь с id=" + friendId + " не найден");
         }
         Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
         userFriendsIds.remove(friendId);
@@ -67,26 +67,23 @@ public class UserService {
         }
         Set<Integer> firstUserFriends = firstUser.getFriendsIds();
         Set<Integer> secondUserFriends = secondUser.getFriendsIds();
-        if (firstUserFriends == null || secondUserFriends == null) {
-            return new ArrayList<>();
-        }
         Set<Integer> mutual = new HashSet<>(firstUserFriends);
         mutual.retainAll(secondUserFriends);
-
         return mutual.stream().map(this::getUserById).collect(Collectors.toList());
     }
 
     public User getUserById(int id) {
-        if (userStorage.getUserById(id) == null) {
-            throw new NotFoundException();
+        User user = userStorage.getUserById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
-        return userStorage.getUserById(id);
+        return user;
     }
 
     public List<User> getFriends(int id) {
         User user = userStorage.getUserById(id);
         if (user == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
         return user.getFriendsIds().stream().map(this::getUserById).collect(Collectors.toList());
     }
@@ -105,7 +102,7 @@ public class UserService {
 
     public User updateUser(User user) {
         if (userStorage.getUserById(user.getId()) == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
         }
         if (isUserDataErrors(user)) {
             throw new ValidationException();
@@ -125,6 +122,8 @@ public class UserService {
     public void removeUser(int id) {
         if (userStorage.getUserById(id) != null) {
             userStorage.removeUser(id);
+        } else {
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
     }
 

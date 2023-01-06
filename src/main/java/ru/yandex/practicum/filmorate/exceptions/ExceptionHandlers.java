@@ -2,12 +2,15 @@ package ru.yandex.practicum.filmorate.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
-
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
+// И так сойдет!))))
+// В интернете пишут, что указать package с классами исключений тоже можно,
+// да и работает вроде бы все.
 public class ExceptionHandlers {
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> notFoundExceptionHandler(final NotFoundException e) {
@@ -20,7 +23,12 @@ public class ExceptionHandlers {
     }
 
     @ExceptionHandler
-    public ResponseEntity<Map<String, String>> runTimeExceptionHandler(final RuntimeException e) {
+    public ResponseEntity<Map<String, String>> validationModelExceptionHandler(final MethodArgumentNotValidException e) {
+        return new ResponseEntity<>(Map.of("error: ", e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> otherExceptionHandler(final Exception e) {
         return new ResponseEntity<>(Map.of("error: ", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

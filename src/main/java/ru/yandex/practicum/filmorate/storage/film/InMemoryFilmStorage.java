@@ -3,19 +3,23 @@ package ru.yandex.practicum.filmorate.storage.film;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
+    private static final Comparator<Film> filmComparator = Comparator
+            .comparing(Film::getLikesCount, Comparator.reverseOrder())
+            .thenComparing(Film::getId);
     private final Map<Integer, Film> filmsById = new HashMap<>();
+
     private int id = 0;
 
     @Override
     public Film addFilm(Film film) {
         film = film.withId(++id);
+//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил строчку ниже
+        film = film.withLikedUsersIds(new HashSet<>());
         filmsById.put(id, film);
         return film;
     }
@@ -27,6 +31,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
+//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил этот if()
+        if (film.getLikedUsersIds() == null) {
+            film = film.withLikedUsersIds(new HashSet<>());
+        }
         filmsById.put(film.getId(), film);
         return film;
     }
@@ -39,5 +47,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getFilms() {
         return new ArrayList<>(filmsById.values());
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms(int count) {
+        return filmsById
+                .values()
+                .stream()
+                .sorted(filmComparator)
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }

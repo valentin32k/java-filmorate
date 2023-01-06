@@ -11,11 +11,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +23,13 @@ public class FilmService {
     public void addLike(int filmId, int userId) {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
-        if (film == null || user == null) {
-            throw new NotFoundException();
+        if (film == null) {
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
         Set<Integer> likes = film.getLikedUsersIds();
-        if (likes == null) {
-            likes = new HashSet<>();
-        }
         likes.add(userId);
         film = film.withLikedUsersIds(likes);
         filmStorage.updateFilm(film);
@@ -41,38 +38,28 @@ public class FilmService {
     public void removeLike(int filmId, int userId) {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
-        if (film == null || user == null) {
-            throw new NotFoundException();
+        if (film == null) {
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
         Set<Integer> likes = film.getLikedUsersIds();
-        if (likes == null) {
-            likes = new HashSet<>();
-        }
         likes.remove(userId);
-//        Вот здесь у меня небольшой вопрос как правильно делать.
-//        Строки ниже, строго говоря, не нужны, но без них код выглядит не логичным.
-//        Оставить как есть или это только мне кажется что логика не видна?
         film = film.withLikedUsersIds(likes);
         filmStorage.updateFilm(film);
     }
 
     public List<Film> getMostPopularFilms(int count) {
-        Comparator<Film> filmComparator = Comparator
-                .comparing(Film::getLikesCount, Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(Film::getId);
-        return filmStorage
-                .getFilms()
-                .stream()
-                .sorted(filmComparator)
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getMostPopularFilms(count);
     }
 
     public Film getFilmById(int id) {
-        if (filmStorage.getFilmById(id) == null) {
-            throw new NotFoundException();
+        Film film = filmStorage.getFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
-        return filmStorage.getFilmById(id);
+        return film;
     }
 
     public Film addFilm(Film film) {
@@ -84,7 +71,7 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         if (filmStorage.getFilmById(film.getId()) == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("Фильм с id=" + film.getId() + " не найден");
         }
         if (isFilmDataErrors(film)) {
             throw new ValidationException();
@@ -99,6 +86,8 @@ public class FilmService {
     public void removeFilm(int id) {
         if (filmStorage.getFilmById(id) != null) {
             filmStorage.removeFilm(id);
+        } else {
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
     }
 

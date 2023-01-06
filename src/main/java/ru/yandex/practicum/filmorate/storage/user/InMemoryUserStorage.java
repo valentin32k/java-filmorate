@@ -3,10 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -16,6 +13,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         user = user.withId(++id);
+//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил строчку ниже
+        user = user.withFriendsIds(new HashSet<>());
         usersById.put(id, user);
         return user;
     }
@@ -27,6 +26,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
+//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил этот if()
+        if (user.getFriendsIds() == null) {
+            user = user.withFriendsIds(new HashSet<>());
+        }
         usersById.put(user.getId(), user);
         return user;
     }
