@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Value;
 import lombok.With;
 
@@ -19,15 +19,8 @@ public class Film {
     @With
     Set<Integer> likedUsersIds;
 
+    @JsonIgnore
     public Integer getLikesCount() {
         return likedUsersIds.size();
-    }
-
-//    Jackson сериализует в том числе результаты getLikesCount(),
-//    что мешает при тестировании создавать экземпляры классов Film (напр. метод void addValidFilm()).
-//    Поэтому я использовал метод с аннотацией @JsonAnySetter, который вызывается на этапе десериализации
-//    для всех параметров, которых нет в конструкторе класса. Наверняка существует более изящное решение, которое я не нашел)))
-    @JsonAnySetter
-    public void add(String key, String value) {
     }
 }

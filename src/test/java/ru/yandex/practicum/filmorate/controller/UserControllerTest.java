@@ -18,10 +18,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 
-// При выполнении задания 10 спринта использовал предлагаемые Практикумом тесты:
-// https://github.com/yandex-praktikum/java-filmorate/blob/add-friends-likes/postman/sprint.json,
-// потому и удалил свои, посчитав их избыточными
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class UserControllerTest {
     private final HttpClient client = HttpClient.newHttpClient();

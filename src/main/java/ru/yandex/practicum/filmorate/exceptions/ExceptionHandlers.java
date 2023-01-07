@@ -8,9 +8,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
-// И так сойдет!))))
-// В интернете пишут, что указать package с классами исключений тоже можно,
-// да и работает вроде бы все.
 public class ExceptionHandlers {
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> notFoundExceptionHandler(final NotFoundException e) {

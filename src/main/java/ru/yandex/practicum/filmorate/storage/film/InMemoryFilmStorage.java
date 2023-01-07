@@ -18,7 +18,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         film = film.withId(++id);
-//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил строчку ниже
         film = film.withLikedUsersIds(new HashSet<>());
         filmsById.put(id, film);
         return film;
@@ -31,7 +30,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил этот if()
         if (film.getLikedUsersIds() == null) {
             film = film.withLikedUsersIds(new HashSet<>());
         }

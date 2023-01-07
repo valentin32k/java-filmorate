@@ -13,7 +13,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         user = user.withId(++id);
-//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил строчку ниже
         user = user.withFriendsIds(new HashSet<>());
         usersById.put(id, user);
         return user;
@@ -26,7 +25,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-//        Не придумал как сделать значение по умолчанию для final-переменной, поэтому добавил этот if()
         if (user.getFriendsIds() == null) {
             user = user.withFriendsIds(new HashSet<>());
         }
