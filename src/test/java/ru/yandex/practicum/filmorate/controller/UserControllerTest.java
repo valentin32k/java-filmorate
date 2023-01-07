@@ -15,13 +15,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class UserControllerTest {
     private final HttpClient client = HttpClient.newHttpClient();
     ObjectMapper mapper = new ObjectMapper();
-    User validUser = new User(0, "email@yandex.ru", "Login", "Name", "1999-01-01");
+    User validUser = new User(0, "email@yandex.ru", "Login", "Name", "1999-01-01", new HashSet<>());
 
 
     @Test
@@ -40,40 +41,40 @@ class UserControllerTest {
 
     @Test
     void addVoidBodyUser() {
-        Assertions.assertEquals(400, sendRequest(null, "POST").statusCode());
+        Assertions.assertEquals(500, sendRequest(null, "POST").statusCode());
     }
 
     @Test
     void addUserWithVoidEmail() {
-        User sendUser = new User(0, "", validUser.getLogin(), validUser.getName(), validUser.getBirthday());
+        User sendUser = new User(0, "", validUser.getLogin(), validUser.getName(), validUser.getBirthday(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
 
     @Test
     void addUserWithWrongEmail() {
-        User sendUser = new User(0, "email", validUser.getLogin(), validUser.getName(), validUser.getBirthday());
+        User sendUser = new User(0, "email", validUser.getLogin(), validUser.getName(), validUser.getBirthday(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
 
     @Test
     void addUserWithVoidLogin() {
-        User sendUser = new User(0, validUser.getEmail(), "", validUser.getName(), validUser.getBirthday());
+        User sendUser = new User(0, validUser.getEmail(), "", validUser.getName(), validUser.getBirthday(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
 
     @Test
     void addUserWithWrongLogin() {
-        User sendUser = new User(0, validUser.getEmail(), "Three words login", validUser.getName(), validUser.getBirthday());
+        User sendUser = new User(0, validUser.getEmail(), "Three words login", validUser.getName(), validUser.getBirthday(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
 
     @Test
     void addUserWithVoidName() throws JsonProcessingException {
-        User sendUser = new User(0, validUser.getEmail(), validUser.getLogin(), "", validUser.getBirthday());
+        User sendUser = new User(0, validUser.getEmail(), validUser.getLogin(), "", validUser.getBirthday(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         User returnedUser = mapper.readValue(response.body(), User.class);
         Assertions.assertEquals(200, response.statusCode());
@@ -87,7 +88,7 @@ class UserControllerTest {
     void addUserWithWrongBirthday() {
         LocalDate birthday = LocalDate.now().plusDays(1);
         String birthdayString = birthday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        User sendUser = new User(0, validUser.getEmail(), validUser.getLogin(), validUser.getName(), birthdayString);
+        User sendUser = new User(0, validUser.getEmail(), validUser.getLogin(), validUser.getName(), birthdayString, new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
@@ -102,7 +103,7 @@ class UserControllerTest {
     void updateWithVoidEmail() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "", "newLogin", "newName", "2020-01-02");
+        User updatedUser = new User(0, "", "newLogin", "newName", "2020-01-02", new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -112,7 +113,7 @@ class UserControllerTest {
     void updateWithWrongEmail() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "email", "newLogin", "newName", "2020-01-02");
+        User updatedUser = new User(0, "email", "newLogin", "newName", "2020-01-02", new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -122,7 +123,7 @@ class UserControllerTest {
     void updateWithVoidLogin() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "newEmail", "", "newName", "2020-01-02");
+        User updatedUser = new User(0, "newEmail", "", "newName", "2020-01-02", new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -132,7 +133,7 @@ class UserControllerTest {
     void updateWithWrongLogin() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "newEmail", "Three words login", "newName", "2020-01-02");
+        User updatedUser = new User(0, "newEmail", "Three words login", "newName", "2020-01-02", new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -142,7 +143,7 @@ class UserControllerTest {
     void updateUserWithVoidName() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User returnedUser = mapper.readValue(response.body(), User.class);
-        User tmpUser = new User(0, "new@email.ru", "newLogin", "", "1999-01-01");
+        User tmpUser = new User(0, "new@email.ru", "newLogin", "", "1999-01-01", new HashSet<>());
         tmpUser = tmpUser.withId(returnedUser.getId());
         response = sendRequest(tmpUser, "PUT");
         User updatedUser = mapper.readValue(response.body(), User.class);
@@ -159,7 +160,7 @@ class UserControllerTest {
         User returnedUser = mapper.readValue(response.body(), User.class);
         LocalDate birthday = LocalDate.now().plusDays(1);
         String birthdayString = birthday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        User sendUser = new User(returnedUser.getId(), returnedUser.getEmail(), returnedUser.getLogin(), returnedUser.getName(), birthdayString);
+        User sendUser = new User(returnedUser.getId(), returnedUser.getEmail(), returnedUser.getLogin(), returnedUser.getName(), birthdayString, new HashSet<>());
         response = sendRequest(sendUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
     }

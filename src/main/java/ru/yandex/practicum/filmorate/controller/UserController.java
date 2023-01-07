@@ -1,71 +1,59 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
-    private final HashMap<Integer, User> usersById = new HashMap<>();
-    private int id = 0;
+    private final UserService userService;
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Integer id,
+                          @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Integer id,
+                             @PathVariable Integer friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getUserFriends(@PathVariable Integer id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id,
+                                       @PathVariable Integer otherId) {
+        return userService.getMutualFriends(id, otherId);
+    }
 
     @PostMapping
     public User addUser(@Valid @RequestBody User newUser) {
-        if (isUserDataErrors(newUser)) {
-            log.warn("Пользователь не создан. В запросе указаны не корректные данные");
-            throw new ValidationException();
-        }
-        String name = newUser.getName();
-        if (StringUtils.isBlank(name)) {
-            name = newUser.getLogin();
-        }
-        User tmpUser = new User(0, newUser.getEmail(), newUser.getLogin(), name, newUser.getBirthday());
-        tmpUser = tmpUser.withId(++id);
-        usersById.put(tmpUser.getId(), tmpUser);
-        log.info("Создан новый пользователь: {}", newUser.getName());
-        return tmpUser;
+        return userService.addUser(newUser);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User newUser) {
-        if (!usersById.containsKey(newUser.getId())) {
-            log.warn("Попытка обновления не существующего пользователя");
-            throw new NotFoundException();
-        }
-        if (isUserDataErrors(newUser)) {
-            log.warn("Сведения о пользователе {} не изменены. Был передан не корректный запрос", newUser.getLogin());
-            throw new ValidationException();
-        }
-        String name = newUser.getName();
-        if (StringUtils.isBlank(name)) {
-            name = newUser.getLogin();
-        }
-        User tmpUser = new User(0, newUser.getEmail(), newUser.getLogin(), name, newUser.getBirthday());
-        tmpUser = tmpUser.withId(newUser.getId());
-        usersById.put(tmpUser.getId(), tmpUser);
-        log.info("Сведения о пользователе {} успешно обновлены", newUser.toString());
-        return tmpUser;
+    public User updateUser(@Valid @RequestBody User updatedUser) {
+        return userService.updateUser(updatedUser);
     }
 
     @GetMapping
     public List<User> getUsers() {
-        return new ArrayList<>(usersById.values());
-    }
-
-    private boolean isUserDataErrors(User user) {
-        boolean isLoginErrors = user.getLogin().contains(" ");
-        LocalDate birthday = LocalDate.parse(user.getBirthday(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        boolean isBirthdayErrors = birthday.isAfter(LocalDate.now());
-        return isLoginErrors || isBirthdayErrors;
+        return userService.getUsers();
     }
 }

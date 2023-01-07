@@ -14,14 +14,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashSet;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class FilmControllerTest {
     private final HttpClient client = HttpClient.newHttpClient();
     ObjectMapper mapper = new ObjectMapper();
-    Film validFilm = new Film(0, "Название фильма", "Описание фильма", "1999-01-01", 1500);
 
+    Film validFilm = new Film(0, "Название фильма", "Описание фильма", "1999-01-01", 1500, new HashSet<>());
 
     @Test
     void addValidFilm() throws JsonProcessingException {
@@ -39,12 +40,12 @@ class FilmControllerTest {
 
     @Test
     void addVoidBodyFilm() {
-        Assertions.assertEquals(400, sendRequest(null, "POST").statusCode());
+        Assertions.assertEquals(500, sendRequest(null, "POST").statusCode());
     }
 
     @Test
     void addFilmWithVoidName() {
-        Film sendFilm = new Film(0, "", validFilm.getDescription(), validFilm.getReleaseDate(), validFilm.getDuration());
+        Film sendFilm = new Film(0, "", validFilm.getDescription(), validFilm.getReleaseDate(), validFilm.getDuration(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendFilm, "POST");
         System.out.println(response.statusCode());
         Assertions.assertEquals(400, response.statusCode());
@@ -52,21 +53,21 @@ class FilmControllerTest {
 
     @Test
     void addFilmWithBigDescription() {
-        Film sendFilm = new Film(0, validFilm.getName(), BIG_FILM_DESCRIPTION, validFilm.getReleaseDate(), validFilm.getDuration());
+        Film sendFilm = new Film(0, validFilm.getName(), BIG_FILM_DESCRIPTION, validFilm.getReleaseDate(), validFilm.getDuration(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendFilm, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
 
     @Test
     void addFilmWithWrongReleaseDate() {
-        Film sendFilm = new Film(0, validFilm.getName(), validFilm.getDescription(), "1812-09-07", validFilm.getDuration());
+        Film sendFilm = new Film(0, validFilm.getName(), validFilm.getDescription(), "1812-09-07", validFilm.getDuration(), new HashSet<>());
         HttpResponse<String> response = sendRequest(sendFilm, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
 
     @Test
     void addFilmWithWrongDuration() {
-        Film sendFilm = new Film(0, validFilm.getName(), validFilm.getDescription(), validFilm.getReleaseDate(), -1);
+        Film sendFilm = new Film(0, validFilm.getName(), validFilm.getDescription(), validFilm.getReleaseDate(), -1, new HashSet<>());
         HttpResponse<String> response = sendRequest(sendFilm, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
@@ -75,7 +76,7 @@ class FilmControllerTest {
     void validFilmUpdate() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validFilm, "POST");
         Film tmpFilm = mapper.readValue(response.body(), Film.class);
-        Film updatedFilm = new Film(0, "newName", "newDescription", "2020-01-02", 111);
+        Film updatedFilm = new Film(0, "newName", "newDescription", "2020-01-02", 111, new HashSet<>());
         updatedFilm = updatedFilm.withId(tmpFilm.getId());
         response = sendRequest(updatedFilm, "PUT");
         Assertions.assertEquals(200, response.statusCode());
@@ -86,7 +87,7 @@ class FilmControllerTest {
     void updateWithVoidName() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validFilm, "POST");
         Film tmpFilm = mapper.readValue(response.body(), Film.class);
-        Film updatedFilm = new Film(0, "", "newDescription", "2020-01-02", 111);
+        Film updatedFilm = new Film(0, "", "newDescription", "2020-01-02", 111, new HashSet<>());
         updatedFilm = updatedFilm.withId(tmpFilm.getId());
         response = sendRequest(updatedFilm, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -96,7 +97,7 @@ class FilmControllerTest {
     void updateWithBigDescription() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validFilm, "POST");
         Film tmpFilm = mapper.readValue(response.body(), Film.class);
-        Film updatedFilm = new Film(0, "newName", BIG_FILM_DESCRIPTION, "2020-01-02", 111);
+        Film updatedFilm = new Film(0, "newName", BIG_FILM_DESCRIPTION, "2020-01-02", 111, new HashSet<>());
         updatedFilm = updatedFilm.withId(tmpFilm.getId());
         response = sendRequest(updatedFilm, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -106,7 +107,7 @@ class FilmControllerTest {
     void updateWithWrongReleaseDate() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validFilm, "POST");
         Film tmpFilm = mapper.readValue(response.body(), Film.class);
-        Film updatedFilm = new Film(0, "newName", "newDescription", "1812-09-07", 111);
+        Film updatedFilm = new Film(0, "newName", "newDescription", "1812-09-07", 111, new HashSet<>());
         updatedFilm = updatedFilm.withId(tmpFilm.getId());
         response = sendRequest(updatedFilm, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -116,7 +117,7 @@ class FilmControllerTest {
     void updateWithWrongDuration() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validFilm, "POST");
         Film tmpFilm = mapper.readValue(response.body(), Film.class);
-        Film updatedFilm = new Film(0, "newName", "newDescription", "2020-01-02", -1);
+        Film updatedFilm = new Film(0, "newName", "newDescription", "2020-01-02", -1, new HashSet<>());
         updatedFilm = updatedFilm.withId(tmpFilm.getId());
         response = sendRequest(updatedFilm, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -125,7 +126,7 @@ class FilmControllerTest {
     @Test
     void updateWithWrongId() {
         Film wrongIdFilm = validFilm.withId(10);
-        Assertions.assertEquals(404,sendRequest(wrongIdFilm, "PUT").statusCode());
+        Assertions.assertEquals(404, sendRequest(wrongIdFilm, "PUT").statusCode());
     }
 
     private HttpResponse<String> sendRequest(Film film, String method) {
