@@ -6,6 +6,7 @@ import lombok.With;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDate;
 import java.util.Set;
 
 @Value
@@ -17,7 +18,7 @@ public class User {
     @NotBlank String login;
     @With
     String name;
-    String birthday;
+    LocalDate birthday;
     @With
     Set<Integer> friendsIds;
 }

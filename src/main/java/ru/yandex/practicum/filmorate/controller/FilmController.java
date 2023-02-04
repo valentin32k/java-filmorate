@@ -48,6 +48,7 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getFilms() {
+        System.out.println(filmService.getFilms());
         return filmService.getFilms();
     }
 }

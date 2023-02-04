@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private static final Comparator<Film> filmComparator = Comparator
             .comparing(Film::getLikesCount, Comparator.reverseOrder())
