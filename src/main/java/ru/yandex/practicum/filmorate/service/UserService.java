@@ -69,19 +69,15 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        User user = userStorage.getUserById(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-        return user;
+        return userStorage.getUserById(id);
     }
 
     public List<User> getFriends(int id) {
-        User user = userStorage.getUserById(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-        return user.getFriendsIds().stream().map(this::getUserById).collect(Collectors.toList());
+        return userStorage.getUserById(id)
+                .getFriendsIds()
+                .stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public User addUser(User user) {
@@ -116,11 +112,10 @@ public class UserService {
     }
 
     public void removeUser(int id) {
-        if (userStorage.getUserById(id) != null) {
-            userStorage.removeUser(id);
-        } else {
+        if (userStorage.getUserById(id) == null) {
             throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
+        userStorage.removeUser(id);
     }
 
     private boolean isUserDataErrors(User user) {

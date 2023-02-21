@@ -1,18 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -20,40 +20,42 @@ import java.util.Set;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
+
     public void addLike(int filmId, int userId) {
-//        Film film = filmStorage.getFilmById(filmId);
-//        User user = userStorage.getUserById(userId);
-//        if (film == null) {
-//            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
-//        }
-//        if (user == null) {
-//            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
-//        }
-//        Set<Integer> likes = film.getLikedUsersIds();
-//        likes.add(userId);
-//        film = film.withLikedUsersIds(likes);
-//        filmStorage.updateFilm(film);
+        Film film = filmStorage.getFilmById(filmId);
+        User user = userStorage.getUserById(userId);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        Set<Integer> likes = film.getLikedUsersIds();
+        likes.add(userId);
+        film = film.withLikedUsersIds(likes);
+        filmStorage.updateFilm(film);
     }
 
     public void removeLike(int filmId, int userId) {
-//        Film film = filmStorage.getFilmById(filmId);
-//        User user = userStorage.getUserById(userId);
-//        if (film == null) {
-//            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
-//        }
-//        if (user == null) {
-//            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
-//        }
-//        Set<Integer> likes = film.getLikedUsersIds();
-//        likes.remove(userId);
-//        film = film.withLikedUsersIds(likes);
-//        filmStorage.updateFilm(film);
+        Film film = filmStorage.getFilmById(filmId);
+        User user = userStorage.getUserById(userId);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        Set<Integer> likes = film.getLikedUsersIds();
+        likes.remove(userId);
+        film = film.withLikedUsersIds(likes);
+        filmStorage.updateFilm(film);
     }
 
     public List<Film> getMostPopularFilms(int count) {
@@ -90,11 +92,26 @@ public class FilmService {
     }
 
     public void removeFilm(int id) {
-        if (filmStorage.getFilmById(id) != null) {
-            filmStorage.removeFilm(id);
-        } else {
+        if (filmStorage.getFilmById(id) == null) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
+        filmStorage.removeFilm(id);
+    }
+
+    public Mpa getMpaById(int id) {
+        return filmStorage.getMpaById(id);
+    }
+
+    public List<Mpa> getAllMpa() {
+        return filmStorage.getAllMpa();
+    }
+
+    public Genre getGenreById(int id) {
+        return filmStorage.getGenreById(id);
+    }
+
+    public List<Genre> getAllGenres() {
+        return filmStorage.getAllGenres();
     }
 
     private boolean isFilmDataErrors(Film film) {
