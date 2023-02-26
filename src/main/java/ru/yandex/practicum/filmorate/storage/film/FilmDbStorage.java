@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.GenresDbStorage;
 import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
 
 import java.sql.PreparedStatement;
@@ -23,7 +22,6 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final MpaDbStorage mpaDbStorage;
-    private final GenresDbStorage genresDbStorage;
 
     @Override
     public Film addFilm(Film film) {
