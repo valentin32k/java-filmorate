@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -21,9 +20,14 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
+    //        Здесь, честно говоря, не совсем понял
+//        как без @Qualifier в переменную интерфейса положить нужную мне имплементацию,
+//        поэтому новая реализация конструктора, наверное, хуже предыдущей.
+//        Такому конструктору InMemoryStorage уже не передашь
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage) {
+    public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage) {
+//    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+//                       @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -96,22 +100,6 @@ public class FilmService {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
         filmStorage.removeFilm(id);
-    }
-
-    public Mpa getMpaById(int id) {
-        return filmStorage.getMpaById(id);
-    }
-
-    public List<Mpa> getAllMpa() {
-        return filmStorage.getAllMpa();
-    }
-
-    public Genre getGenreById(int id) {
-        return filmStorage.getGenreById(id);
-    }
-
-    public List<Genre> getAllGenres() {
-        return filmStorage.getAllGenres();
     }
 
     private boolean isFilmDataErrors(Film film) {

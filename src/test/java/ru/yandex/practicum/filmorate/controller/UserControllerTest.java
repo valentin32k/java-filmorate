@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,8 +28,14 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
     private final HttpClient client = HttpClient.newHttpClient();
+    private final UserDbStorage userDbStorage;
     ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     User validUser = new User(0, "email@yandex.ru", "Login", "Name", LocalDate.parse("1999-01-01"), new HashSet<>());
+
+    @BeforeEach
+    void clearStorage() {
+        userDbStorage.getUsers().forEach(u -> {userDbStorage.removeUser(u.getId());});
+    }
 
     @Test
     void addValidUser() throws JsonProcessingException {

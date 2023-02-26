@@ -58,24 +58,4 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .limit(count)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public Mpa getMpaById(int id) {
-        return null;
-    }
-
-    @Override
-    public List<Mpa> getAllMpa() {
-        return null;
-    }
-
-    @Override
-    public Genre getGenreById(int id) {
-        return null;
-    }
-
-    @Override
-    public List<Genre> getAllGenres() {
-        return null;
-    }
 }

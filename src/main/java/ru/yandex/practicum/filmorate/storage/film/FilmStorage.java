@@ -18,12 +18,4 @@ public interface FilmStorage {
     List<Film> getFilms();
 
     List<Film> getMostPopularFilms(int count);
-
-    Mpa getMpaById(int id);
-
-    List<Mpa> getAllMpa();
-
-    Genre getGenreById(int id);
-
-    List<Genre> getAllGenres();
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -27,6 +28,11 @@ public class UserStorageTest {
             "Name",
             LocalDate.parse("1990-01-01"),
             new HashSet<>());
+
+    @BeforeEach
+    public void clearStorage() {
+        userStorage.getUsers().forEach(u -> userStorage.removeUser(u.getId()));
+    }
 
     @Test
     void testAddingValidUser() {
@@ -118,9 +124,21 @@ public class UserStorageTest {
     @Test
     void testGetUsers() {
         assertThat(userStorage.getUsers()).isEmpty();
+        User validUser2 = new User(0,
+                "email2@mail.ru",
+                "Login2",
+                "Name",
+                LocalDate.parse("1990-01-01"),
+                new HashSet<>());
+        User validUser3 = new User(0,
+                "email3@mail.ru",
+                "Login3",
+                "Name",
+                LocalDate.parse("1990-01-01"),
+                new HashSet<>());
         userStorage.addUser(validUser);
-        userStorage.addUser(validUser.withName("Вася"));
-        userStorage.addUser(validUser.withName("Петя"));
+        userStorage.addUser(validUser2);
+        userStorage.addUser(validUser3);
         assertThat(userStorage.getUsers().size()).isEqualTo(3);
     }
 }
