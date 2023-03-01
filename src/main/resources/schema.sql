@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
                          birthday date
 );
 
-CREATE UNIQUE INDEX ON users (email, login);
+CREATE UNIQUE INDEX ON users (email);
+CREATE UNIQUE INDEX ON users (login);
 
 CREATE TABLE IF NOT EXISTS friendship (
                               user_id int,
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS films (
                          release_date date,
                          duration int,
                          mpa_id int,
+                         likes_count int,
                          FOREIGN KEY (mpa_id) REFERENCES mpa (mpa_id)
 );
 

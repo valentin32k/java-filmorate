@@ -36,6 +36,7 @@ public class FilmStorageTest {
             .duration(1500)
             .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
             .likedUsersIds(new HashSet<>())
+            .likesCount(0)
             .genres(new HashSet<>())
             .build();
 
@@ -90,6 +91,7 @@ public class FilmStorageTest {
                 .duration(2500)
                 .mpa(new Mpa(2, "PG", "детям рекомендуется смотреть фильм с родителями"))
                 .likedUsersIds(new HashSet<>())
+                .likesCount(0)
                 .genres(new HashSet<>())
                 .build();
         filmStorage.updateFilm(newFilm);
@@ -181,6 +183,7 @@ public class FilmStorageTest {
                 .duration(1500)
                 .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
+                .likesCount(1)
                 .genres(new HashSet<>())
                 .build();
         Film film3 = Film.builder()
@@ -191,6 +194,7 @@ public class FilmStorageTest {
                 .duration(1500)
                 .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
+                .likesCount(2)
                 .genres(new HashSet<>())
                 .build();
         film1 = filmStorage.addFilm(film1);
@@ -200,8 +204,8 @@ public class FilmStorageTest {
         Set<Integer> likes3 = new HashSet<>(Arrays.asList(user1.getId(), user2.getId()));
         film2 = film2.withLikedUsersIds(likes2);
         film3 = film3.withLikedUsersIds(likes3);
-        filmStorage.updateFilm(film2);
-        filmStorage.updateFilm(film3);
+        film2 = filmStorage.updateFilm(film2);
+        film3 = filmStorage.updateFilm(film3);
         assertThat(filmStorage.getMostPopularFilms(5)).isEqualTo(List.of(film3, film2, film1));
     }
 }

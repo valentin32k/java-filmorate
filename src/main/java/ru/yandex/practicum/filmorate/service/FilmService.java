@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -16,25 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
-
-    //        Здесь, честно говоря, не совсем понял
-//        как без @Qualifier в переменную интерфейса положить нужную мне имплементацию,
-//        поэтому новая реализация конструктора, наверное, хуже предыдущей.
-//        Такому конструктору InMemoryStorage уже не передашь
-    @Autowired
-    public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage) {
-//    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-//                       @Qualifier("userDbStorage") UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
+    private final FilmStorage filmDbStorage;
+    private final UserStorage userDbStorage;
 
     public void addLike(int filmId, int userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        User user = userStorage.getUserById(userId);
+        Film film = filmDbStorage.getFilmById(filmId);
+        User user = userDbStorage.getUserById(userId);
         if (film == null) {
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
@@ -44,12 +31,12 @@ public class FilmService {
         Set<Integer> likes = film.getLikedUsersIds();
         likes.add(userId);
         film = film.withLikedUsersIds(likes);
-        filmStorage.updateFilm(film);
+        filmDbStorage.updateFilm(film);
     }
 
     public void removeLike(int filmId, int userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        User user = userStorage.getUserById(userId);
+        Film film = filmDbStorage.getFilmById(filmId);
+        User user = userDbStorage.getUserById(userId);
         if (film == null) {
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
@@ -59,15 +46,15 @@ public class FilmService {
         Set<Integer> likes = film.getLikedUsersIds();
         likes.remove(userId);
         film = film.withLikedUsersIds(likes);
-        filmStorage.updateFilm(film);
+        filmDbStorage.updateFilm(film);
     }
 
     public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.getMostPopularFilms(count);
+        return filmDbStorage.getMostPopularFilms(count);
     }
 
     public Film getFilmById(int id) {
-        Film film = filmStorage.getFilmById(id);
+        Film film = filmDbStorage.getFilmById(id);
         if (film == null) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
@@ -78,28 +65,28 @@ public class FilmService {
         if (isFilmDataErrors(film)) {
             throw new ValidationException();
         }
-        return filmStorage.addFilm(film);
+        return filmDbStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        if (filmStorage.getFilmById(film.getId()) == null) {
+        if (filmDbStorage.getFilmById(film.getId()) == null) {
             throw new NotFoundException("Фильм с id=" + film.getId() + " не найден");
         }
         if (isFilmDataErrors(film)) {
             throw new ValidationException();
         }
-        return filmStorage.updateFilm(film);
+        return filmDbStorage.updateFilm(film);
     }
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmDbStorage.getFilms();
     }
 
     public void removeFilm(int id) {
-        if (filmStorage.getFilmById(id) == null) {
+        if (filmDbStorage.getFilmById(id) == null) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
-        filmStorage.removeFilm(id);
+        filmDbStorage.removeFilm(id);
     }
 
     private boolean isFilmDataErrors(Film film) {

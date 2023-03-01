@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -18,14 +16,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
-
-    @Autowired
-//    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
-    public UserService(UserDbStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final UserStorage userDbStorage;
 
     public void addFriend(int id, int friendId) {
         User firstFriend = getUserById(id);
@@ -39,7 +32,7 @@ public class UserService {
         Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
         userFriendsIds.add(friendId);
         firstFriend = firstFriend.withFriendsIds(userFriendsIds);
-        userStorage.updateUser(firstFriend);
+        userDbStorage.updateUser(firstFriend);
     }
 
     public void removeFriend(int id, int friendId) {
@@ -54,7 +47,7 @@ public class UserService {
         Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
         userFriendsIds.remove(friendId);
         firstFriend = firstFriend.withFriendsIds(userFriendsIds);
-        userStorage.updateUser(firstFriend);
+        userDbStorage.updateUser(firstFriend);
     }
 
     public List<User> getMutualFriends(int id, int friendId) {
@@ -71,11 +64,11 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        return userStorage.getUserById(id);
+        return userDbStorage.getUserById(id);
     }
 
     public List<User> getFriends(int id) {
-        return userStorage.getUserById(id)
+        return userDbStorage.getUserById(id)
                 .getFriendsIds()
                 .stream()
                 .map(this::getUserById)
@@ -91,11 +84,11 @@ public class UserService {
             name = user.getLogin();
         }
         user = user.withName(name);
-        return userStorage.addUser(user);
+        return userDbStorage.addUser(user);
     }
 
     public User updateUser(User user) {
-        if (userStorage.getUserById(user.getId()) == null) {
+        if (userDbStorage.getUserById(user.getId()) == null) {
             throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
         }
         if (isUserDataErrors(user)) {
@@ -106,18 +99,18 @@ public class UserService {
             name = user.getLogin();
         }
         user = user.withName(name);
-        return userStorage.updateUser(user);
+        return userDbStorage.updateUser(user);
     }
 
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return userDbStorage.getUsers();
     }
 
     public void removeUser(int id) {
-        if (userStorage.getUserById(id) == null) {
+        if (userDbStorage.getUserById(id) == null) {
             throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
-        userStorage.removeUser(id);
+        userDbStorage.removeUser(id);
     }
 
     private boolean isUserDataErrors(User user) {

@@ -39,6 +39,7 @@ class FilmControllerTest {
             .duration(1500)
             .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
             .likedUsersIds(new HashSet<>())
+            .likesCount(0)
             .genres(new HashSet<>())
             .build();
     @Test
@@ -137,6 +138,7 @@ class FilmControllerTest {
                 .duration(111)
                 .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
+                .likesCount(0)
                 .genres(new HashSet<>())
                 .build();
         updatedFilm = updatedFilm.withId(tmpFilm.getId());
