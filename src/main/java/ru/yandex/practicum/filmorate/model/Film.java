@@ -23,5 +23,6 @@ public class Film {
     Integer likesCount;
     @With
     Set<Integer> likedUsersIds;
+    @With
     Set<Genre> genres;
 }

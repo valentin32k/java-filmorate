@@ -116,82 +116,28 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int id) {
-        String sqlQuery = "SELECT f.FILM_ID, " +
-                "f.FILM_NAME, " +
-                "f.film_DESCRIPTION, " +
-                "f.RELEASE_DATE, " +
-                "f.DURATION, " +
-                "f.MPA_ID, " +
-                "f.LIKES_COUNT," +
-                "m.MPA_NAME, " +
+        String sqlQuery = "SELECT f.film_id, " +
+                "f.film_name, " +
+                "f.film_description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "f.mpa_id, " +
+                "f.likes_count," +
+                "m.mpa_name, " +
                 "m.mpa_description, " +
-                "l.USER_ID, " +
-                "fg.GENRE_ID, " +
-                "g.GENRE_NAME " +
-                "FROM FILMS f " +
-                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN LIKED l ON f.FILM_ID = l.FILM_ID " +
-                "LEFT JOIN FILM_GENRES fg ON f.FILM_ID = fg.FILM_ID " +
-                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID " +
-                "WHERE f.FILM_ID = ?";
+                "l.user_id, " +
+                "fg.genre_id, " +
+                "g.genre_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN liked l ON f.film_id = l.film_id " +
+                "LEFT JOIN film_genres fg ON f.film_id = fg.film_id " +
+                "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                "WHERE f.film_id = ?";
         SqlRowSet filmSet = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!filmSet.next()) {
             throw new NotFoundException("Фильм с id = " + id + " не найден");
         }
-        return serializeFilm(filmSet);
-    }
-
-    @Override
-    public List<Film> getFilms() {
-//        List<Film> films = new ArrayList<>();
-//        String sqlQuery = "SELECT film_id FROM films ORDER BY film_id";
-//        SqlRowSet filmsSet = jdbcTemplate.queryForRowSet(sqlQuery);
-//        while (filmsSet.next()) {
-//            films.add(getFilmById(filmsSet.getInt("film_id")));
-//        }
-//        return films;
-
-        String sqlQuery = "SELECT f.FILM_ID, " +
-                "f.FILM_NAME, " +
-                "f.film_DESCRIPTION, " +
-                "f.RELEASE_DATE, " +
-                "f.DURATION, " +
-                "f.MPA_ID, " +
-                "f.LIKES_COUNT," +
-                "m.MPA_NAME, " +
-                "m.mpa_description, " +
-                "l.USER_ID, " +
-                "fg.GENRE_ID, " +
-                "g.GENRE_NAME " +
-                "FROM FILMS f " +
-                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN LIKED l ON f.FILM_ID = l.FILM_ID " +
-                "LEFT JOIN FILM_GENRES fg ON f.FILM_ID = fg.FILM_ID " +
-                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID";
-        SqlRowSet filmSet = jdbcTemplate.queryForRowSet(sqlQuery);
-        List<Film> films = new ArrayList<>();
-
-
-
-
-        return films;
-    }
-
-    @Override
-    public List<Film> getMostPopularFilms(int count) {
-        List<Film> films = new ArrayList<>();
-        String sqlQuery = "SELECT film_id " +
-                "FROM films " +
-                "ORDER BY likes_count " +
-                "DESC LIMIT ?";
-        SqlRowSet filmsSet = jdbcTemplate.queryForRowSet(sqlQuery, count);
-        while (filmsSet.next()) {
-            films.add(getFilmById(filmsSet.getInt("film_id")));
-        }
-        return films;
-    }
-
-    private Film serializeFilm(SqlRowSet filmSet) {
         Mpa mpa = new Mpa(filmSet.getInt("mpa_id"),
                 filmSet.getString("mpa_name"),
                 filmSet.getString("mpa_description"));
@@ -225,5 +171,77 @@ public class FilmDbStorage implements FilmStorage {
                 .likedUsersIds(likedUsersIds)
                 .genres(genreSet)
                 .build();
+    }
+
+    @Override
+    public List<Film> getFilms() {
+        String sqlQuery = "SELECT f.film_id, " +
+                "f.film_name, " +
+                "f.film_description, " +
+                "f.release_date, " +
+                "f.duration, " +
+                "f.mpa_id, " +
+                "f.likes_count," +
+                "m.mpa_name, " +
+                "m.mpa_description, " +
+                "l.user_id, " +
+                "fg.genre_id, " +
+                "g.genre_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "LEFT JOIN liked l ON f.film_id = l.film_id " +
+                "LEFT JOIN film_genres fg ON f.film_id = fg.film_id " +
+                "LEFT JOIN genre g ON fg.genre_id = g.genre_id";
+        SqlRowSet filmSet = jdbcTemplate.queryForRowSet(sqlQuery);
+        Map<Integer, Film> filmsById = new HashMap<>();
+        while (filmSet.next()) {
+            Film currFilm = filmsById.get(filmSet.getInt("film_id"));
+            if (currFilm == null) {
+                Mpa mpa = new Mpa(filmSet.getInt("mpa_id"),
+                        filmSet.getString("mpa_name"),
+                        filmSet.getString("mpa_description"));
+                currFilm = Film.builder()
+                        .id(filmSet.getInt("film_id"))
+                        .name(filmSet.getString("film_name"))
+                        .description(filmSet.getString("film_description"))
+                        .releaseDate(Objects.requireNonNull(filmSet.getDate("release_date")).toLocalDate())
+                        .duration(filmSet.getLong("duration"))
+                        .mpa(mpa)
+                        .likesCount(filmSet.getInt("likes_count"))
+                        .likedUsersIds(new HashSet<>())
+                        .genres(new HashSet<>())
+                        .build();
+            }
+            int likeUserId = filmSet.getInt("user_id");
+            if (likeUserId != 0) {
+                Set<Integer> likes = currFilm.getLikedUsersIds();
+                likes.add(likeUserId);
+                currFilm = currFilm.withLikedUsersIds(likes);
+            }
+            int genreId = filmSet.getInt("genre_id");
+            if (genreId != 0) {
+                Genre genre = new Genre(genreId,
+                        filmSet.getString("genre_name"));
+                Set<Genre> genres = currFilm.getGenres();
+                genres.add(genre);
+                currFilm = currFilm.withGenres(genres);
+            }
+            filmsById.put(currFilm.getId(), currFilm);
+        }
+        return new ArrayList<>(filmsById.values());
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms(int count) {
+        List<Film> films = new ArrayList<>();
+        String sqlQuery = "SELECT film_id " +
+                "FROM films " +
+                "ORDER BY likes_count " +
+                "DESC LIMIT ?";
+        SqlRowSet filmsSet = jdbcTemplate.queryForRowSet(sqlQuery, count);
+        while (filmsSet.next()) {
+            films.add(getFilmById(filmsSet.getInt("film_id")));
+        }
+        return films;
     }
 }

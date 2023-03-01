@@ -34,7 +34,9 @@ class UserControllerTest {
 
     @BeforeEach
     void clearStorage() {
-        userDbStorage.getUsers().forEach(u -> {userDbStorage.removeUser(u.getId());});
+        userDbStorage.getUsers().forEach(u -> {
+            userDbStorage.removeUser(u.getId());
+        });
     }
 
     @Test

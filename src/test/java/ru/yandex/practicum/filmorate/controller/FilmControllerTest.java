@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.io.IOException;
@@ -37,11 +36,12 @@ class FilmControllerTest {
             .description("Описание фильма")
             .releaseDate(LocalDate.parse("1999-01-01"))
             .duration(1500)
-            .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+            .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
             .likedUsersIds(new HashSet<>())
             .likesCount(0)
             .genres(new HashSet<>())
             .build();
+
     @Test
     void addValidFilm() throws JsonProcessingException {
         sendRequest(validFilm, "POST");
@@ -69,7 +69,7 @@ class FilmControllerTest {
                 .description("Описание фильма")
                 .releaseDate(LocalDate.parse("1999-01-01"))
                 .duration(1500)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -86,7 +86,7 @@ class FilmControllerTest {
                 .description(BIG_FILM_DESCRIPTION)
                 .releaseDate(LocalDate.parse("1999-01-01"))
                 .duration(1500)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -102,7 +102,7 @@ class FilmControllerTest {
                 .description("Описание фильма")
                 .releaseDate(LocalDate.parse("1812-09-07"))
                 .duration(1500)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -118,7 +118,7 @@ class FilmControllerTest {
                 .description("Описание фильма")
                 .releaseDate(LocalDate.parse("1999-01-01"))
                 .duration(-1)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -136,7 +136,7 @@ class FilmControllerTest {
                 .description("newDescription")
                 .releaseDate(LocalDate.parse("2020-01-02"))
                 .duration(111)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .likesCount(0)
                 .genres(new HashSet<>())
@@ -157,7 +157,7 @@ class FilmControllerTest {
                 .description("newDescription")
                 .releaseDate(LocalDate.parse("2020-01-02"))
                 .duration(111)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -176,7 +176,7 @@ class FilmControllerTest {
                 .description(BIG_FILM_DESCRIPTION)
                 .releaseDate(LocalDate.parse("2020-01-02"))
                 .duration(111)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -195,7 +195,7 @@ class FilmControllerTest {
                 .description("newDescription")
                 .releaseDate(LocalDate.parse("1812-09-07"))
                 .duration(111)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();
@@ -214,7 +214,7 @@ class FilmControllerTest {
                 .description("newDescription")
                 .releaseDate(LocalDate.parse("2020-01-02"))
                 .duration(-1)
-                .mpa(new Mpa(1,"G","у фильма нет возрастных ограничений"))
+                .mpa(new Mpa(1, "G", "у фильма нет возрастных ограничений"))
                 .likedUsersIds(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();

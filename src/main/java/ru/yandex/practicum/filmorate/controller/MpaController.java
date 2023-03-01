@@ -15,6 +15,7 @@ import java.util.List;
 @RequestMapping("/mpa")
 public class MpaController {
     private final MpaService mpaService;
+
     @GetMapping("/{id}")
     public Mpa getMpaById(@PathVariable Integer id) {
         return mpaService.getMpaById(id);

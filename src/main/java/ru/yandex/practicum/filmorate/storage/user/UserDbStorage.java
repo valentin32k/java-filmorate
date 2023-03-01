@@ -94,8 +94,8 @@ public class UserDbStorage implements UserStorage {
                 "u.birthday," +
                 "f.user_friend_id " +
                 "FROM users u " +
-                "LEFT JOIN FRIENDSHIP f ON u.user_id = f.user_id " +
-                "WHERE u.USER_ID = ?";
+                "LEFT JOIN friendship f ON u.user_id = f.user_id " +
+                "WHERE u.user_id = ?";
         SqlRowSet users = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (!users.next()) {
             throw new NotFoundException("Пользователь с id = " + id + " не найден");
@@ -119,12 +119,34 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getUsers() {
-        List<User> users = new ArrayList<>();
-        String sqlQuery = "SELECT user_id FROM users";
-        SqlRowSet userSet = jdbcTemplate.queryForRowSet(sqlQuery);
-        while (userSet.next()) {
-            users.add(getUserById(userSet.getInt("user_id")));
+        String sqlQuery = "SELECT u.user_id," +
+                "u.email," +
+                "u.login," +
+                "u.user_name," +
+                "u.birthday," +
+                "f.user_friend_id " +
+                "FROM users u " +
+                "LEFT JOIN friendship f ON u.user_id = f.user_id";
+        SqlRowSet users = jdbcTemplate.queryForRowSet(sqlQuery);
+        Map<Integer, User> usersById = new HashMap<>();
+        while (users.next()) {
+            User currUser = usersById.get(users.getInt("user_id"));
+            if (currUser == null) {
+                currUser = new User(users.getInt("user_id"),
+                        users.getString("email"),
+                        users.getString("login"),
+                        users.getString("user_name"),
+                        Objects.requireNonNull(users.getDate("birthday")).toLocalDate(),
+                        new HashSet<>());
+            }
+            int friendId = users.getInt("user_friend_id");
+            if (friendId != 0) {
+                Set<Integer> friends = currUser.getFriendsIds();
+                friends.add(friendId);
+                currUser = currUser.withFriendsIds(friends);
+            }
+            usersById.put(currUser.getId(), currUser);
         }
-        return users;
+        return new ArrayList<>(usersById.values());
     }
 }
