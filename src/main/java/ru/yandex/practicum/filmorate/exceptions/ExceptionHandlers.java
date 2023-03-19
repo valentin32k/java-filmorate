@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
+
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 public class ExceptionHandlers {
     @ExceptionHandler

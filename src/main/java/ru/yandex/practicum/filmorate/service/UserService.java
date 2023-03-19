@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
+    private final UserStorage userDbStorage;
 
     public void addFriend(int id, int friendId) {
         User firstFriend = getUserById(id);
@@ -33,11 +32,7 @@ public class UserService {
         Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
         userFriendsIds.add(friendId);
         firstFriend = firstFriend.withFriendsIds(userFriendsIds);
-        userFriendsIds = secondFriend.getFriendsIds();
-        userFriendsIds.add(id);
-        secondFriend = secondFriend.withFriendsIds(userFriendsIds);
-        userStorage.updateUser(firstFriend);
-        userStorage.updateUser(secondFriend);
+        userDbStorage.updateUser(firstFriend);
     }
 
     public void removeFriend(int id, int friendId) {
@@ -52,11 +47,7 @@ public class UserService {
         Set<Integer> userFriendsIds = firstFriend.getFriendsIds();
         userFriendsIds.remove(friendId);
         firstFriend = firstFriend.withFriendsIds(userFriendsIds);
-        userFriendsIds = secondFriend.getFriendsIds();
-        userFriendsIds.remove(id);
-        secondFriend = secondFriend.withFriendsIds(userFriendsIds);
-        userStorage.updateUser(firstFriend);
-        userStorage.updateUser(secondFriend);
+        userDbStorage.updateUser(firstFriend);
     }
 
     public List<User> getMutualFriends(int id, int friendId) {
@@ -73,19 +64,15 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        User user = userStorage.getUserById(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-        return user;
+        return userDbStorage.getUserById(id);
     }
 
     public List<User> getFriends(int id) {
-        User user = userStorage.getUserById(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-        return user.getFriendsIds().stream().map(this::getUserById).collect(Collectors.toList());
+        return userDbStorage.getUserById(id)
+                .getFriendsIds()
+                .stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public User addUser(User user) {
@@ -97,11 +84,11 @@ public class UserService {
             name = user.getLogin();
         }
         user = user.withName(name);
-        return userStorage.addUser(user);
+        return userDbStorage.addUser(user);
     }
 
     public User updateUser(User user) {
-        if (userStorage.getUserById(user.getId()) == null) {
+        if (userDbStorage.getUserById(user.getId()) == null) {
             throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
         }
         if (isUserDataErrors(user)) {
@@ -112,25 +99,23 @@ public class UserService {
             name = user.getLogin();
         }
         user = user.withName(name);
-        return userStorage.updateUser(user);
+        return userDbStorage.updateUser(user);
     }
 
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return userDbStorage.getUsers();
     }
 
     public void removeUser(int id) {
-        if (userStorage.getUserById(id) != null) {
-            userStorage.removeUser(id);
-        } else {
+        if (userDbStorage.getUserById(id) == null) {
             throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
+        userDbStorage.removeUser(id);
     }
 
     private boolean isUserDataErrors(User user) {
         boolean isLoginErrors = user.getLogin().contains(" ");
-        LocalDate birthday = LocalDate.parse(user.getBirthday(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        boolean isBirthdayErrors = birthday.isAfter(LocalDate.now());
+        boolean isBirthdayErrors = user.getBirthday().isAfter(LocalDate.now());
         return isLoginErrors || isBirthdayErrors;
     }
 }

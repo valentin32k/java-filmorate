@@ -3,10 +3,15 @@ package ru.yandex.practicum.filmorate.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -14,16 +19,25 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
     private final HttpClient client = HttpClient.newHttpClient();
-    ObjectMapper mapper = new ObjectMapper();
-    User validUser = new User(0, "email@yandex.ru", "Login", "Name", "1999-01-01", new HashSet<>());
+    private final UserDbStorage userDbStorage;
+    ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    User validUser = new User(0, "email@yandex.ru", "Login", "Name", LocalDate.parse("1999-01-01"), new HashSet<>());
 
+    @BeforeEach
+    void clearStorage() {
+        userDbStorage.getUsers().forEach(u -> {
+            userDbStorage.removeUser(u.getId());
+        });
+    }
 
     @Test
     void addValidUser() throws JsonProcessingException {
@@ -87,8 +101,7 @@ class UserControllerTest {
     @Test
     void addUserWithWrongBirthday() {
         LocalDate birthday = LocalDate.now().plusDays(1);
-        String birthdayString = birthday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        User sendUser = new User(0, validUser.getEmail(), validUser.getLogin(), validUser.getName(), birthdayString, new HashSet<>());
+        User sendUser = new User(0, validUser.getEmail(), validUser.getLogin(), validUser.getName(), birthday, new HashSet<>());
         HttpResponse<String> response = sendRequest(sendUser, "POST");
         Assertions.assertEquals(400, response.statusCode());
     }
@@ -103,7 +116,7 @@ class UserControllerTest {
     void updateWithVoidEmail() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "", "newLogin", "newName", "2020-01-02", new HashSet<>());
+        User updatedUser = new User(0, "", "newLogin", "newName", LocalDate.parse("2020-01-02"), new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -113,7 +126,7 @@ class UserControllerTest {
     void updateWithWrongEmail() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "email", "newLogin", "newName", "2020-01-02", new HashSet<>());
+        User updatedUser = new User(0, "email", "Login", "Name", LocalDate.parse("1999-01-01"), new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -123,7 +136,7 @@ class UserControllerTest {
     void updateWithVoidLogin() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "newEmail", "", "newName", "2020-01-02", new HashSet<>());
+        User updatedUser = new User(0, "newEmail", "", "newName", LocalDate.parse("2020-01-02"), new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -133,7 +146,7 @@ class UserControllerTest {
     void updateWithWrongLogin() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User tmpUser = mapper.readValue(response.body(), User.class);
-        User updatedUser = new User(0, "newEmail", "Three words login", "newName", "2020-01-02", new HashSet<>());
+        User updatedUser = new User(0, "newEmail", "Three words login", "newName", LocalDate.parse("2020-01-02"), new HashSet<>());
         updatedUser = updatedUser.withId(tmpUser.getId());
         response = sendRequest(updatedUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
@@ -143,7 +156,7 @@ class UserControllerTest {
     void updateUserWithVoidName() throws JsonProcessingException {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User returnedUser = mapper.readValue(response.body(), User.class);
-        User tmpUser = new User(0, "new@email.ru", "newLogin", "", "1999-01-01", new HashSet<>());
+        User tmpUser = new User(0, "new@email.ru", "newLogin", "", LocalDate.parse("1999-01-01"), new HashSet<>());
         tmpUser = tmpUser.withId(returnedUser.getId());
         response = sendRequest(tmpUser, "PUT");
         User updatedUser = mapper.readValue(response.body(), User.class);
@@ -159,8 +172,7 @@ class UserControllerTest {
         HttpResponse<String> response = sendRequest(validUser, "POST");
         User returnedUser = mapper.readValue(response.body(), User.class);
         LocalDate birthday = LocalDate.now().plusDays(1);
-        String birthdayString = birthday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        User sendUser = new User(returnedUser.getId(), returnedUser.getEmail(), returnedUser.getLogin(), returnedUser.getName(), birthdayString, new HashSet<>());
+        User sendUser = new User(returnedUser.getId(), returnedUser.getEmail(), returnedUser.getLogin(), returnedUser.getName(), birthday, new HashSet<>());
         response = sendRequest(sendUser, "PUT");
         Assertions.assertEquals(400, response.statusCode());
     }
