@@ -1,2 +1,15 @@
-# java-filmorate
-Template repository for Filmorate project.
+# Репозиторий для проекта Java-Filmorate (Оценки фильмов)
+
+### Функциональность ###
+Приложение для хранения информации о фильмах и составления их рейтинга на основании оценок пользователей.
+
+### Стек технологий ### 
+Java 11, Spring Boot, Maven, JUnit, H2.
+
+### Системные требования ###
+Для запуска и работы приложения потребуется Java 11
+
+### Инструкция по развёртыванию ### 
+**Клонировать репозиторий.** *git clone https://github.com/valentin32k/java-filmorate.git*.  
+**Запустить проект.** FilmorateApplication run.  
+Cервис будет доступен по адресу: http://localhost:8080.
